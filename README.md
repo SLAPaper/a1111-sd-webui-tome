@@ -49,7 +49,7 @@ Generation Info|Disabled ToMe|ToMe:0.5|ToMe:0.9
 ---------------|-------------|--------|--------
 Eular a, 512*512, batch 1, 30 steps|32.41 it/s|33.37 it/s|33.33 it/s
 DPM++ 2M Karras, 512*512, batch 1, 30 steps|32.78 it/s|32.42 it/s|31.79 it/s
-DPM++ 2M Karras, 512*512, batch 4, 30 steps|12.01 it/s|11.36 it/s|13.27 it/s
+DPM++ 2M Karras, 512*512, batch 4, 30 steps|12.01 it/s|12.03 it/s|13.27 it/s
 DPM++ 2M Karras, 512*512, batch 8, 30 steps|5.79 it/s|6.57 it/s|6.73 it/s
 DPM++ 2M Karras, 512*512, batch 8, 150 steps|5.73 it/s|6.58 it/s|6.76 it/s
 -|-|-|-
