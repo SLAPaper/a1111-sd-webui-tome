@@ -56,11 +56,11 @@ DPM++ 2M Karras, 768*768, batch 1, 30 steps|20.73 it/s|19.69 it/s|20.76 it/s
 -|-|-|-
 DPM++ 2M Karras, 1024*1024, batch 1, 30 steps|7.72 it/s|**9.88 it/s (+27.98%)**|**10.83 it/s (+40.28%)**
 -|-|-|-
-DPM++ 2M Karras, 2048*2048, batch 1, 30 steps|1.19 it/s|**1.52 it/s (+27.73%)**|**1.92 it/s (+61.34%)**
+DPM++ 2M Karras, 2048*2048, batch 1, 30 steps|1.15 s/it|**1.52 it/s (+74.80%)**|**1.92 it/s (+120.80%)**
 
 
 ### Conclusion
 
-Works with big image size and big batch size, you will need total pixel of 4 * 512 * 512 = 1024 * 1024 or more to see a difference
+Works with big image size and big batch size, you will need total pixel of 4 * 512*512 = 1024*1024 or more to see a difference
 
-The higher the total pixel there are, the more performance boost you'll get
+The higher the total pixel there are, the more performance boost you'll get, on 2048*2048, it could be over +100%
