@@ -51,9 +51,6 @@ DPM++ 2M Karras, 512*512, batch 1, 30 steps, Hires fix 4x|1.16 s/it|**1.50 it/s 
 DPM++ 2M Karras, 512*512, batch 4, 30 steps|12.01 it/s|12.03 it/s|**13.27 it/s (+10.49%)**
 DPM++ 2M Karras, 512*512, batch 8, 30 steps|5.79 it/s|**6.57 it/s (+13.47%)**|**6.73 it/s (+16.23%)**
 -|-|-|-
-Eular a, 768*512, batch 1, 30 steps|27.78 it/s|26.98 it/s|27.93 it/s
-DPM++ 2M Karras, 768*512, batch 1, 30 steps|28.29 it/s|27.19 it/s|27.44 it/s
--|-|-|-
 Eular a, 768*768, batch 1, 30 steps|20.65 it/s|19.75 it/s|20.68 it/s
 DPM++ 2M Karras, 768*768, batch 1, 30 steps|20.73 it/s|19.69 it/s|20.76 it/s
 -|-|-|-
