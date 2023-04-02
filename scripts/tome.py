@@ -18,6 +18,7 @@ import launch
 import gradio as gr
 import tomesd
 import sys
+import torch
 
 
 class ToMe:
@@ -28,12 +29,36 @@ class ToMe:
         if launch.is_installed("tomesd"):
             self._has_tomesd = True
 
-    def on_model_loaded_callback(self, model):
+    def on_model_loaded_callback(self, model: torch.nn.Module):
         if shared.opts.data.get('tome_enable', False):
             ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
-            tomesd.apply_patch(model, ratio=ratio)
+            max_downsample: int = int(
+                shared.opts.data.get('tome_maximum_down_sampling', 1))
+            sx: int = shared.opts.data.get('tome_stride_x', 2)
+            sy: int = shared.opts.data.get('tome_stride_y', 2)
+            use_rand: bool = shared.opts.data.get('tome_random', True)
+            merge_attn: bool = shared.opts.data.get('tome_merge_attention',
+                                                    True)
+            merge_crossattn: bool = shared.opts.data.get(
+                'tome_merge_cross_attention', False)
+            merge_mlp: bool = shared.opts.data.get('tome_merge_mlp', False)
 
-            print(f"Applying ToMe patch with ratio[{ratio}]", file=sys.stderr)
+            tomesd.apply_patch(model,
+                               ratio=ratio,
+                               max_downsample=max_downsample,
+                               sx=sx,
+                               sy=sy,
+                               use_rand=use_rand,
+                               merge_attn=merge_attn,
+                               merge_crossattn=merge_crossattn,
+                               merge_mlp=merge_mlp)
+
+            print(
+                f"Applying ToMe patch with ratio[{ratio}], "
+                f"max_downsample[{max_downsample}], sx[{sx}], sy[{sy}], "
+                f"use_rand[{use_rand}], merge_attn[{merge_attn}], "
+                f"merge_crossattn[{merge_crossattn}], merge_mlp[{merge_mlp}]",
+                file=sys.stderr)
         else:
             tomesd.remove_patch(model)
 
@@ -45,20 +70,71 @@ class ToMe:
             "tome_enable",
             shared.OptionInfo(
                 False,
-                "Enable ToMe optimization if you installed tomesd [apply when loading checkpoints]",
+                "Enable ToMe optimization if you installed tomesd",
                 gr.Checkbox, {"interactive": True},
                 section=section))
         shared.opts.add_option(
             "tome_merging_ratio",
             shared.OptionInfo(
                 0.5,
-                "ToMe merging ratio, higher the faster, at the cost of generation quality (slightly) [apply when loading checkpoint]",
+                "ToMe merging ratio, higher the faster, it should not go over 1-(1/(sx*sy)), which is 0.75 by default",
                 gr.Slider, {
-                    "minimum": 0.1,
-                    "maximum": 0.9,
-                    "step": 0.1
+                    "minimum": 0,
+                    "maximum": 0.99,
+                    "step": 0.01
                 },
                 section=section))
+        shared.opts.add_option(
+            "tome_random",
+            shared.OptionInfo(
+                True,
+                "Use random perturbations - Disable if you see werid artifacts",
+                gr.Checkbox,
+                section=section))
+        shared.opts.add_option(
+            "tome_merge_attention",
+            shared.OptionInfo(True,
+                              "Merge attention (recommended)",
+                              gr.Checkbox,
+                              section=section))
+        shared.opts.add_option(
+            "tome_merge_cross_attention",
+            shared.OptionInfo(False,
+                              "Merge cross attention (not recommended)",
+                              gr.Checkbox,
+                              section=section))
+        shared.opts.add_option(
+            "tome_merge_mlp",
+            shared.OptionInfo(False,
+                              "Merge mlp (very not recommended)",
+                              gr.Checkbox,
+                              section=section))
+        shared.opts.add_option(
+            "tome_maximum_down_sampling",
+            shared.OptionInfo("1",
+                              "Maximum down sampling",
+                              gr.Radio, {"choices": ["1", "2", "4", "8"]},
+                              section=section))
+        shared.opts.add_option(
+            "tome_stride_x",
+            shared.OptionInfo(2,
+                              "Stride - X",
+                              gr.Slider, {
+                                  "minimum": 2,
+                                  "maximum": 8,
+                                  "step": 2
+                              },
+                              section=section))
+        shared.opts.add_option(
+            "tome_stride_y",
+            shared.OptionInfo(2,
+                              "Stride - Y",
+                              gr.Slider, {
+                                  "minimum": 2,
+                                  "maximum": 8,
+                                  "step": 2
+                              },
+                              section=section))
 
 
 _tome_instance = ToMe()
