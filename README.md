@@ -28,6 +28,8 @@ Do anything necessary needed if you have a fancy environment settings like me.
 
 And then follow the instruction of [tomesd Installation](https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/9256)
 
+After successfully installed tomesd, installed this extension like other normal webui extensions (install via URL from webui or clone this repo to `extensions` folder manually)
+
 ## Settings
 
 In `Settings` tab, you'll find a section called `ToMe Settings`, there are 2 options:
