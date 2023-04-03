@@ -59,6 +59,8 @@ DPM++ 2M Karras, 512*512, batch 8|5.79 it/s|6.57 it/s **(+13.47%)**|6.73 it/s **
 -|-|-|-
 Eular a, 768*768, batch 1|20.65 it/s|19.75 it/s|20.68 it/s
 DPM++ 2M Karras, 768*768, batch 1|20.73 it/s|19.69 it/s|20.76 it/s
+DPM++ 2M Karras, 768*768 (SD2.1), batch 1|18.63 it/s|20.25 it/s|21.02 it/s
+DPM++ 2M Karras, 768*768 (SD2.1), batch 1, Hires fix 2x|3.11 it/s|4.24 it/s **(+36.33%)**|4.77 it/s **(+53.38%)**
 -|-|-|-
 DPM++ 2M Karras, 1024*1024, batch 1|7.72 it/s|9.88 it/s **(+27.98%)**|10.83 it/s **(+40.28%)**
 -|-|-|-
