@@ -32,16 +32,18 @@ After successfully installed tomesd, installed this extension like other normal 
 
 ## Settings
 
-In `Settings` tab, you'll find a section called `ToMe Settings`, there are 2 options:
+In `Settings` tab, you'll find a section called `ToMe Settings`, there are 2 major options and other advanced ones:
 
 1. Enable ToMe: self explained
-2. ToMe Merging Ratio: default is 0.5, higher the faster, at the cost of (slightly) generation quality
+2. ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.5, but you could go to 0.9 or more if you can accept the quality
 
 All the settings apply when you reload the sd model (checkpoint).
 
 ## Performance
 
 Tested on RTX 4090, Python 3.10.9, PyTorch 2.0, CUDA 11.8, CuDNN 8.8.1.3, with `--skip-version-check --xformers --opt-sdp-attention --no-half-vae` enabled, step 30, batch count 5, same seed, use best result
+
+PS: ratio 0.9 is just for showcasing the performance, it's not the way it should be configured (according to `tomesd` document, `ratio` is limited by `1-(1/(s_x * s_y))`, which is `0.75` by default (`s_x` and `s_y` default to 2)), and the genereation quality is not taken into account)
 
 Generation Info|Disabled ToMe|ToMe:0.5|ToMe:0.9
 ---------------|-------------|--------|--------
@@ -66,4 +68,6 @@ DPM++ 2M Karras, 2048*2048, batch 1|1.15 s/it|1.52 it/s **(+74.80%)**|1.92 it/s 
 
 Works with big image size and big batch size, you will need total pixel of `4*512*512 = 1024*1024` or more to see a difference
 
-The higher the total pixel there are, the more performance boost you'll get, on `2048*2048`, it could be over +100%
+The higher the total pixel there are, the more performance boost you'll get, on `2048*2048`, it could be over +100% in extreme settings
+
+In more common scenarios (`512*512 with hires fix 2x`), you can get around +30% speedup during the hires part, which is a definitely time saver
