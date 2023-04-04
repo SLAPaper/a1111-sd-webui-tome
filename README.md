@@ -16,7 +16,7 @@
 
 # ToMe extension for Stable Diffusion A1111 WebUI
 
-Use [tomesd](https://github.com/dbolya/tomesd) to speed up generation
+Use [tomesd](https://github.com/dbolya/tomesd) aka. Token Merging to speed up generation
 
 Related: [official PR of A1111 WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/9256)
 
