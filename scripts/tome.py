@@ -16,63 +16,61 @@ import modules.scripts as scripts
 import modules.shared as shared
 import launch
 import gradio as gr
-import tomesd
 import sys
 import torch
+from modules.processing import Processed, StableDiffusionProcessing
 
 
 class ToMe:
     """ToMe implementation"""
 
     def __init__(self):
-        self._has_tomesd = False
-        if launch.is_installed("tomesd"):
-            self._has_tomesd = True
+        pass
 
-    def on_model_loaded_callback(self, model: torch.nn.Module):
-        if shared.opts.data.get('tome_enable', False):
-            ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
-            max_downsample: int = int(
-                shared.opts.data.get('tome_maximum_down_sampling', 1))
-            sx: int = shared.opts.data.get('tome_stride_x', 2)
-            sy: int = shared.opts.data.get('tome_stride_y', 2)
-            use_rand: bool = shared.opts.data.get('tome_random', True)
-            merge_attn: bool = shared.opts.data.get('tome_merge_attention',
-                                                    True)
-            merge_crossattn: bool = shared.opts.data.get(
-                'tome_merge_cross_attention', False)
-            merge_mlp: bool = shared.opts.data.get('tome_merge_mlp', False)
-
-            tomesd.apply_patch(model,
-                               ratio=ratio,
-                               max_downsample=max_downsample,
-                               sx=sx,
-                               sy=sy,
-                               use_rand=use_rand,
-                               merge_attn=merge_attn,
-                               merge_crossattn=merge_crossattn,
-                               merge_mlp=merge_mlp)
-
+    def patch_model(self, model: torch.nn.Module):
+        if not launch.is_installed("tomesd"):
             print(
-                f"Applying ToMe patch with ratio[{ratio}], "
-                f"max_downsample[{max_downsample}], sx[{sx}], sy[{sy}], "
-                f"use_rand[{use_rand}], merge_attn[{merge_attn}], "
-                f"merge_crossattn[{merge_crossattn}], merge_mlp[{merge_mlp}]",
+                "Cannot import tomesd, please install it manually following the instructions on https://github.com/dbolya/tomesd",
                 file=sys.stderr)
-        else:
-            tomesd.remove_patch(model)
+            return
 
-            print(f"ToMe patch is not enabled", file=sys.stderr)
+        ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
+        max_downsample: int = int(
+            shared.opts.data.get('tome_maximum_down_sampling', 1))
+        sx: int = shared.opts.data.get('tome_stride_x', 2)
+        sy: int = shared.opts.data.get('tome_stride_y', 2)
+        use_rand: bool = shared.opts.data.get('tome_random', True)
+        merge_attn: bool = shared.opts.data.get('tome_merge_attention', True)
+        merge_crossattn: bool = shared.opts.data.get(
+            'tome_merge_cross_attention', False)
+        merge_mlp: bool = shared.opts.data.get('tome_merge_mlp', False)
+
+        import tomesd
+        tomesd.apply_patch(model,
+                           ratio=ratio,
+                           max_downsample=max_downsample,
+                           sx=sx,
+                           sy=sy,
+                           use_rand=use_rand,
+                           merge_attn=merge_attn,
+                           merge_crossattn=merge_crossattn,
+                           merge_mlp=merge_mlp)
+
+        print(
+            f"Applying ToMe patch with ratio[{ratio}], "
+            f"max_downsample[{max_downsample}], sx[{sx}], sy[{sy}], "
+            f"use_rand[{use_rand}], merge_attn[{merge_attn}], "
+            f"merge_crossattn[{merge_crossattn}], merge_mlp[{merge_mlp}]",
+            file=sys.stderr)
 
     def on_ui_settings_callback(self):
+        if not launch.is_installed("tomesd"):
+            print(
+                "Cannot import tomesd, please install it manually following the instructions on https://github.com/dbolya/tomesd",
+                file=sys.stderr)
+            return
+
         section = ('tome', 'ToMe Settings')
-        shared.opts.add_option(
-            "tome_enable",
-            shared.OptionInfo(
-                False,
-                "Enable ToMe optimization if you installed tomesd",
-                gr.Checkbox, {"interactive": True},
-                section=section))
         shared.opts.add_option(
             "tome_merging_ratio",
             shared.OptionInfo(
@@ -138,6 +136,46 @@ class ToMe:
 
 
 _tome_instance = ToMe()
-scripts.script_callbacks.on_model_loaded(
-    _tome_instance.on_model_loaded_callback)
 scripts.script_callbacks.on_ui_settings(_tome_instance.on_ui_settings_callback)
+
+
+class Script(scripts.Script):
+    """Use script interface to inject into image generation loop"""
+
+    def title(self):
+        return "ToMe"
+
+    def show(self, is_img2img: bool):
+        return scripts.AlwaysVisible
+
+    def ui(self, is_img2img: bool):
+        if launch.is_installed("tomesd"):
+            return [
+                gr.Checkbox(
+                    value=True,
+                    label="Enable ToMe optimization",
+                    info=
+                    "Use tomesd to boost generation speed. Other settings in Settings Tab.",
+                    interactive=True)
+            ]
+        else:
+            return [
+                gr.Checkbox(
+                    value=False,
+                    label="Enable ToMe optimization",
+                    info=
+                    "Import tomesd failed, please check your environment before using ToMe extension.",
+                    interactive=False)
+            ]
+
+    def process(self, p: StableDiffusionProcessing, *args):
+        # patch all, unload when postprocess
+        if args and args[0]:
+            _tome_instance.patch_model(p.sd_model)
+
+    def postprocess(self, p: StableDiffusionProcessing, processed: Processed,
+                    *args):
+        # remove patch all
+        if args and args[0]:
+            import tomesd
+            tomesd.remove_patch(p.sd_model)

@@ -16,6 +16,8 @@ import sys
 import launch
 
 if not launch.is_installed("tomesd"):
+    launch.run_pip('install -U tomesd', 'Install ToMe for Stable Diffusion')
+    # will throw Exception, so next line may not print
     print(
         "Cannot import tomesd, please install it manually following the instructions on https://github.com/dbolya/tomesd",
         file=sys.stderr)

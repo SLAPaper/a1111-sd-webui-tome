@@ -37,7 +37,9 @@ In `Settings` tab, you'll find a section called `ToMe Settings`, there are 2 maj
 1. Enable ToMe: self explained
 2. ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.5, but you could go to 0.9 or more if you can accept the quality
 
-All the settings apply when you reload the sd model (checkpoint).
+Now all the settings apply instantly.
+
+Cannot apply ToMe only to hires fix since A1111 WebUI didn't expose the hires pass out so I can't patch the model on the fly.
 
 ## Performance
 
