@@ -44,7 +44,7 @@ In `Settings` tab, you'll find a section called `ToMe Settings`, there are 1 maj
 
 Now all the settings apply instantly when you save settings.
 
-Cannot apply ToMe only to hires fix since A1111 WebUI didn't expose the hires pass (it's enclosed in text2img's sample method), so I can't patch the model on the fly.
+Cannot apply ToMe only to hires fix since A1111 WebUI didn't expose the hires logic (it's enclosed in `StableDiffusionProcessingTxt2Img`'s `sample` method), so I can't patch the model on the fly.
 
 ## Performance
 
@@ -77,3 +77,5 @@ Works with big image size and big batch size, you will need total pixel of `4*51
 The higher the total pixel there are, the more performance boost you'll get, on `2048*2048`, it could be over +100% in extreme settings
 
 In more common scenarios (`512*512 with hires fix 2x`), you can get around +30% speedup during the hires part, which is a definitely time saver
+
+PS: after I did above test, I updated xformers from 0.0.17 to 0.0.18, it seems that there is overall ~10% speedboost, so the exact generation speed value may vary if I redo the test.
