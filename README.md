@@ -30,16 +30,21 @@ And then follow the instruction of [tomesd Installation](https://github.com/AUTO
 
 After successfully installed tomesd, installed this extension like other normal webui extensions (install via URL from webui or clone this repo to `extensions` folder manually)
 
+## Usage
+
+Enable it by checking `Enable ToMe optimization` below generation UI, where many other extensions are (eg. ControlNet)
+
+If you installed tomesd correctly, it should be enabled by default.
+
 ## Settings
 
-In `Settings` tab, you'll find a section called `ToMe Settings`, there are 2 major options and other advanced ones:
+In `Settings` tab, you'll find a section called `ToMe Settings`, there are 1 major options and other advanced ones:
 
-1. Enable ToMe: self explained
-2. ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.5, but you could go to 0.9 or more if you can accept the quality
+1. ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.5, but you could go to 0.9 or more if you can accept the quality
 
-Now all the settings apply instantly.
+Now all the settings apply instantly when you save settings.
 
-Cannot apply ToMe only to hires fix since A1111 WebUI didn't expose the hires pass out so I can't patch the model on the fly.
+Cannot apply ToMe only to hires fix since A1111 WebUI didn't expose the hires pass (it's enclosed in text2img's sample method), so I can't patch the model on the fly.
 
 ## Performance
 
