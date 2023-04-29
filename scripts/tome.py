@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
+import gradio as gr
+import torch
+
+import launch
 import modules.scripts as scripts
 import modules.shared as shared
-import launch
-import gradio as gr
-import sys
-import torch
 from modules.processing import Processed, StableDiffusionProcessing
 
 
@@ -83,9 +85,31 @@ class ToMe:
                 },
                 section=section))
         shared.opts.add_option(
+            "tome_min_x",
+            shared.OptionInfo(
+                768,
+                "Only activate tome if image width reach this value",
+                gr.Slider, {
+                    "minimum": 512,
+                    "maximum": 2048,
+                    "step": 256
+                },
+                section=section))
+        shared.opts.add_option(
+            "tome_min_y",
+            shared.OptionInfo(
+                768,
+                "Only activate tome if image height reach this value",
+                gr.Slider, {
+                    "minimum": 512,
+                    "maximum": 2048,
+                    "step": 256
+                },
+                section=section))
+        shared.opts.add_option(
             "tome_random",
             shared.OptionInfo(
-                True,
+                False,
                 "Use random perturbations - Disable if you see werid artifacts",
                 gr.Checkbox,
                 section=section))
@@ -171,7 +195,18 @@ class Script(scripts.Script):
     def process(self, p: StableDiffusionProcessing, *args):
         # patch all, unload when postprocess
         if args and args[0]:
-            _tome_instance.patch_model(p.sd_model)
+            tome_min_x = shared.opts.data.get('tome_min_x', 768)
+            tome_min_y = shared.opts.data.get('tome_min_y', 768)
+
+            if p.width >= tome_min_x and p.height >= tome_min_y:
+                _tome_instance.patch_model(p.sd_model)
+                return
+
+            print(
+                f'Image size [{p.width}*{p.height}] < '
+                f'Threashold [{tome_min_x}*{tome_min_y}]'
+                ', no need to apply ToMe patch',
+                file=sys.stderr)
 
     def postprocess(self, p: StableDiffusionProcessing, processed: Processed,
                     *args):
