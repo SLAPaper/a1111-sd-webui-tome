@@ -42,7 +42,7 @@ In `Settings` tab, you'll find a section called `ToMe Settings`, there are 3 maj
 
 Major settings:
 - ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.6 according to tomesd [document](https://github.com/dbolya/tomesd/blob/main/README.md#what-is-tome-for-sd)
-- ToMe Min x/y: only apply ToMe when image size reach these values, since ToMe have few benefit when image size is small
+- ToMe Min x/y: only apply ToMe when image size reach these values, since ToMe have few benefit when image size is small (when collab with xformers/SDP)
 
 Advance settings:
 - Use random perturbations: had been caused some artifacts in some sampling methods, fixed in tomsd [v0.1.3](https://github.com/dbolya/tomesd/blob/main/CHANGELOG.md#v013)
