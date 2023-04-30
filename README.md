@@ -50,7 +50,7 @@ Advance settings:
 
 ## Usage Tips & Design Thoughts
 
-- Cannot apply ToMe only to hires fix pass since A1111 WebUI didn't expose the hires logic (it's enclosed in `StableDiffusionProcessingTxt2Img`'s `sample` method).
+- Cannot apply ToMe only to hires fix pass since A1111 WebUI didn't expose the hires logic (it's enclosed in `StableDiffusionProcessingTxt2Img`'s `sample` method). You can do a normal text2image first and then send to image2imamge for scaling up instead.
 - It will change the image content. If your prompt is simple (like `1girl`), it changes a lot. So I can't take hires size and batch size into account, or you will get a complete different image simply because you toggle hires fix or change batch size. (It should be writen into image meta. That is a TODO and I will implement it when I find the way to do that)
 - Feel free to turn on/off ToMe if you worry it affects your image quality. More over, you can pin `tome_merging_ratio` to your UI quick settings for fast tuning. Every change will apply to the next time you click `Generate` button.
 
