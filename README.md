@@ -38,13 +38,21 @@ If you installed tomesd correctly, it should be enabled by default.
 
 ## Settings
 
-In `Settings` tab, you'll find a section called `ToMe Settings`, there are 1 major options and other advanced ones:
+In `Settings` tab, you'll find a section called `ToMe Settings`, there are 3 major options and other advanced ones:
 
-1. ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.5, but you could go to 0.9 or more if you can accept the quality
+Major settings:
+- ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.6 according to tomesd [document](https://github.com/dbolya/tomesd/blob/main/README.md#what-is-tome-for-sd)
+- ToMe Min x/y: only apply ToMe when image size reach these values, since ToMe have few benefit when image size is small
 
-Now all the settings apply instantly when you save settings.
+Advance settings:
+- Use random perturbations: had been caused some artifacts in some sampling methods, fixed in tomsd [v0.1.3](https://github.com/dbolya/tomesd/blob/main/CHANGELOG.md#v013)
+- and other stuff, leave them default if U don't know what you are doing
 
-Cannot apply ToMe only to hires fix since A1111 WebUI didn't expose the hires logic (it's enclosed in `StableDiffusionProcessingTxt2Img`'s `sample` method), so I can't patch the model on the fly.
+## Usage Tips & Design Thoughts
+
+- Cannot apply ToMe only to hires fix pass since A1111 WebUI didn't expose the hires logic (it's enclosed in `StableDiffusionProcessingTxt2Img`'s `sample` method).
+- It will change the image content. If your prompt is simple (like `1girl`), it changes a lot. So I can't take hires size and batch size into account, or you will get a complete different image simply because you toggle hires fix or change batch size. (It should be writen into image meta. That is a TODO and I will implement it when I find the way to do that)
+- Feel free to turn on/off ToMe if you worry it affects your image quality. More over, you can pin `tome_merging_ratio` to your UI quick settings for fast tuning. Every change will apply to the next time you click `Generate` button.
 
 ## Performance
 
