@@ -41,17 +41,19 @@ If you installed tomesd correctly, it should be enabled by default.
 In `Settings` tab, you'll find a section called `ToMe Settings`, there are 3 major options and other advanced ones:
 
 Major settings:
+
 - ToMe Merging Ratio: higher the faster, at the cost of (sort of) generation quality, recommend <=0.6 according to tomesd [document](https://github.com/dbolya/tomesd/blob/main/README.md#what-is-tome-for-sd)
 - ToMe Min x/y: only apply ToMe when image size reach these values, since ToMe have few benefit when image size is small (when collab with xformers/SDP)
 
 Advance settings:
+
 - Use random perturbations: had been caused some artifacts in some sampling methods, fixed in tomsd [v0.1.3](https://github.com/dbolya/tomesd/blob/main/CHANGELOG.md#v013)
 - and other stuff, leave them default if U don't know what you are doing
 
 ## Usage Tips & Design Thoughts
 
 - Cannot apply ToMe only to hires fix pass since A1111 WebUI didn't expose the hires logic (it's enclosed in `StableDiffusionProcessingTxt2Img`'s `sample` method). You can do a normal text2image first and then send to image2imamge for scaling up instead.
-- It will change the image content. If your prompt is simple (like `1girl`), it changes a lot. So I can't take hires size and batch size into account, or you will get a complete different image simply because you toggle hires fix or change batch size. (It should be writen into image meta. That is a TODO and I will implement it when I find the way to do that)
+- It will change the image content. If your prompt is simple (like `1girl`), it changes a lot. So I can't take hires size and batch size into account, or you will get a complete different image simply because you toggle hires fix or change batch size. The state of ToMe will be written into image generation info (how to load it when you paste is under examination)
 - Feel free to turn on/off ToMe if you worry it affects your image quality. More over, you can pin `tome_merging_ratio` to your UI quick settings for fast tuning. Every change will apply the next time you click `Generate` button.
 
 ## Performance

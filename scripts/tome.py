@@ -27,25 +27,21 @@ class ToMe:
     """ToMe implementation"""
 
     def __init__(self):
-        pass
+        self.infotext_fields = []
+        self.paste_field_names = []
 
     def patch_model(self, model: torch.nn.Module):
-        if not launch.is_installed("tomesd"):
-            print(
-                "Cannot import tomesd, please install it manually following the instructions on https://github.com/dbolya/tomesd",
-                file=sys.stderr)
-            return
-
         ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
         max_downsample: int = int(
             shared.opts.data.get('tome_maximum_down_sampling', 1))
-        sx: int = shared.opts.data.get('tome_stride_x', 2)
-        sy: int = shared.opts.data.get('tome_stride_y', 2)
-        use_rand: bool = shared.opts.data.get('tome_random', True)
-        merge_attn: bool = shared.opts.data.get('tome_merge_attention', True)
-        merge_crossattn: bool = shared.opts.data.get(
-            'tome_merge_cross_attention', False)
-        merge_mlp: bool = shared.opts.data.get('tome_merge_mlp', False)
+        sx: int = int(shared.opts.data.get('tome_stride_x', 2))
+        sy: int = int(shared.opts.data.get('tome_stride_y', 2))
+        use_rand: bool = bool(shared.opts.data.get('tome_random', True))
+        merge_attn: bool = bool(
+            shared.opts.data.get('tome_merge_attention', True))
+        merge_crossattn: bool = bool(
+            shared.opts.data.get('tome_merge_cross_attention', False))
+        merge_mlp: bool = bool(shared.opts.data.get('tome_merge_mlp', False))
 
         import tomesd
         tomesd.apply_patch(model,
@@ -66,12 +62,6 @@ class ToMe:
             file=sys.stderr)
 
     def on_ui_settings_callback(self):
-        if not launch.is_installed("tomesd"):
-            print(
-                "Cannot import tomesd, please install it manually following the instructions on https://github.com/dbolya/tomesd",
-                file=sys.stderr)
-            return
-
         section = ('tome', 'ToMe Settings')
         shared.opts.add_option(
             "tome_merging_ratio",
@@ -173,33 +163,56 @@ class Script(scripts.Script):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img: bool):
-        if launch.is_installed("tomesd"):
-            return [
-                gr.Checkbox(
-                    value=True,
-                    label="Enable ToMe optimization",
-                    info=
-                    "Use tomesd to boost generation speed. Other settings in Settings Tab.",
-                    interactive=True)
-            ]
-        else:
-            return [
-                gr.Checkbox(
-                    value=False,
-                    label="Enable ToMe optimization",
-                    info=
-                    "Import tomesd failed, please check your environment before using ToMe extension.",
-                    interactive=False)
-            ]
+        enable_checkbox = gr.Checkbox(
+            value=True,
+            label="Enable ToMe optimization",
+            info=
+            "Use tomesd to boost generation speed. Other settings in Settings Tab.",
+            interactive=True)
+
+        if not launch.is_installed("tomesd"):
+            enable_checkbox.info = "Import tomesd failed, please check your environment before using ToMe extension."
+            enable_checkbox.interactive = False
+
+        return [enable_checkbox]
 
     def process(self, p: StableDiffusionProcessing, *args):
         # patch all, unload when postprocess
+        if not launch.is_installed("tomesd"):
+            print(
+                "Cannot import tomesd, please install it manually following the instructions on https://github.com/dbolya/tomesd",
+                file=sys.stderr)
+            return
+
         if args and args[0]:
             tome_min_x = shared.opts.data.get('tome_min_x', 768)
             tome_min_y = shared.opts.data.get('tome_min_y', 768)
 
             if p.width >= tome_min_x and p.height >= tome_min_y:
                 _tome_instance.patch_model(p.sd_model)
+                
+                # add generation info
+                ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
+                max_downsample: int = int(
+                    shared.opts.data.get('tome_maximum_down_sampling', 1))
+                sx: int = int(shared.opts.data.get('tome_stride_x', 2))
+                sy: int = int(shared.opts.data.get('tome_stride_y', 2))
+                use_rand: bool = bool(shared.opts.data.get('tome_random', True))
+                merge_attn: bool = bool(
+                    shared.opts.data.get('tome_merge_attention', True))
+                merge_crossattn: bool = bool(
+                    shared.opts.data.get('tome_merge_cross_attention', False))
+                merge_mlp: bool = bool(shared.opts.data.get('tome_merge_mlp', False))
+
+                p.extra_generation_params['tome_merging_ratio'] = ratio
+                p.extra_generation_params['tome_maximum_down_sampling'] = max_downsample
+                p.extra_generation_params['tome_stride_x'] = sx
+                p.extra_generation_params['tome_stride_y'] = sy
+                p.extra_generation_params['tome_random'] = use_rand
+                p.extra_generation_params['tome_merge_attention'] = merge_attn
+                p.extra_generation_params['tome_merge_cross_attention'] = merge_crossattn
+                p.extra_generation_params['tome_merge_mlp'] = merge_mlp
+
                 return
 
             print(
@@ -210,6 +223,9 @@ class Script(scripts.Script):
 
     def postprocess(self, p: StableDiffusionProcessing, processed: Processed,
                     *args):
+        if not launch.is_installed("tomesd"):
+            return
+
         # remove patch all
         if args and args[0]:
             import tomesd
