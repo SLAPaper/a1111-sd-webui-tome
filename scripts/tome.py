@@ -30,7 +30,7 @@ class ToMe:
         self.infotext_fields = []
         self.paste_field_names = []
 
-    def patch_model(self, model: torch.nn.Module):
+    def patch_model(self, model: torch.nn.Module, is_hires: bool):
         ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
         max_downsample: int = int(
             shared.opts.data.get('tome_maximum_down_sampling', 1))
@@ -54,8 +54,10 @@ class ToMe:
                            merge_crossattn=merge_crossattn,
                            merge_mlp=merge_mlp)
 
+        target = 'to hires pass' if is_hires else 'globally'
+
         print(
-            f"Applying ToMe patch with ratio[{ratio}], "
+            f"Applying ToMe patch {target} with ratio[{ratio}], "
             f"max_downsample[{max_downsample}], sx[{sx}], sy[{sy}], "
             f"use_rand[{use_rand}], merge_attn[{merge_attn}], "
             f"merge_crossattn[{merge_crossattn}], merge_mlp[{merge_mlp}]",
@@ -147,6 +149,12 @@ class ToMe:
                                   "step": 2
                               },
                               section=section))
+        shared.opts.add_option(
+            "tome_force_hires",
+            shared.OptionInfo(True,
+                              "Enable during hires pass (Experimental)",
+                              gr.Checkbox,
+                              section=section))
 
 
 _tome_instance = ToMe()
@@ -189,28 +197,32 @@ class Script(scripts.Script):
             tome_min_y = shared.opts.data.get('tome_min_y', 768)
 
             if p.width >= tome_min_x and p.height >= tome_min_y:
-                _tome_instance.patch_model(p.sd_model)
-                
+                _tome_instance.patch_model(p.sd_model, is_hires=False)
+
                 # add generation info
                 ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
                 max_downsample: int = int(
                     shared.opts.data.get('tome_maximum_down_sampling', 1))
                 sx: int = int(shared.opts.data.get('tome_stride_x', 2))
                 sy: int = int(shared.opts.data.get('tome_stride_y', 2))
-                use_rand: bool = bool(shared.opts.data.get('tome_random', True))
+                use_rand: bool = bool(shared.opts.data.get(
+                    'tome_random', True))
                 merge_attn: bool = bool(
                     shared.opts.data.get('tome_merge_attention', True))
                 merge_crossattn: bool = bool(
                     shared.opts.data.get('tome_merge_cross_attention', False))
-                merge_mlp: bool = bool(shared.opts.data.get('tome_merge_mlp', False))
+                merge_mlp: bool = bool(
+                    shared.opts.data.get('tome_merge_mlp', False))
 
                 p.extra_generation_params['tome_merging_ratio'] = ratio
-                p.extra_generation_params['tome_maximum_down_sampling'] = max_downsample
+                p.extra_generation_params[
+                    'tome_maximum_down_sampling'] = max_downsample
                 p.extra_generation_params['tome_stride_x'] = sx
                 p.extra_generation_params['tome_stride_y'] = sy
                 p.extra_generation_params['tome_random'] = use_rand
                 p.extra_generation_params['tome_merge_attention'] = merge_attn
-                p.extra_generation_params['tome_merge_cross_attention'] = merge_crossattn
+                p.extra_generation_params[
+                    'tome_merge_cross_attention'] = merge_crossattn
                 p.extra_generation_params['tome_merge_mlp'] = merge_mlp
 
                 return
@@ -228,5 +240,53 @@ class Script(scripts.Script):
 
         # remove patch all
         if args and args[0]:
+            import tomesd
+            tomesd.remove_patch(p.sd_model)
+
+    def before_hires_pass(self, p, *args, **kwargs):
+        if not launch.is_installed("tomesd"):
+            return
+
+        tome_force_hires: bool = bool(
+            shared.opts.data.get('tome_force_hires', True))
+        if tome_force_hires and args and args[0]:
+            _tome_instance.patch_model(p.sd_model, is_hires=True)
+
+            # add generation info
+            ratio: float = shared.opts.data.get('tome_merging_ratio', 0.5)
+            max_downsample: int = int(
+                shared.opts.data.get('tome_maximum_down_sampling', 1))
+            sx: int = int(shared.opts.data.get('tome_stride_x', 2))
+            sy: int = int(shared.opts.data.get('tome_stride_y', 2))
+            use_rand: bool = bool(shared.opts.data.get('tome_random', True))
+            merge_attn: bool = bool(
+                shared.opts.data.get('tome_merge_attention', True))
+            merge_crossattn: bool = bool(
+                shared.opts.data.get('tome_merge_cross_attention', False))
+            merge_mlp: bool = bool(
+                shared.opts.data.get('tome_merge_mlp', False))
+            tome_force_hires: bool = bool(
+                shared.opts.data.get('tome_force_hires', True))
+
+            p.extra_generation_params['tome_merging_ratio'] = ratio
+            p.extra_generation_params[
+                'tome_maximum_down_sampling'] = max_downsample
+            p.extra_generation_params['tome_stride_x'] = sx
+            p.extra_generation_params['tome_stride_y'] = sy
+            p.extra_generation_params['tome_random'] = use_rand
+            p.extra_generation_params['tome_merge_attention'] = merge_attn
+            p.extra_generation_params[
+                'tome_merge_cross_attention'] = merge_crossattn
+            p.extra_generation_params['tome_merge_mlp'] = merge_mlp
+            p.extra_generation_params['tome_force_hires'] = tome_force_hires
+
+    def post_hires_pass(self, p, *args, **kwargs):
+        if not launch.is_installed("tomesd"):
+            return
+
+        tome_force_hires: bool = bool(
+            shared.opts.data.get('tome_force_hires', True))
+        # remove patch all
+        if tome_force_hires and args and args[0]:
             import tomesd
             tomesd.remove_patch(p.sd_model)

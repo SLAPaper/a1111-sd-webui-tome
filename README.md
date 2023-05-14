@@ -20,6 +20,11 @@ Use [tomesd](https://github.com/dbolya/tomesd) aka. Token Merging to speed up ge
 
 Related: [official PR of A1111 WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/9256)
 
+## Changelog
+
+- 2023/05/14: Experimental support activating during **hires fix**! Requires my modified version to A1111 WebUI, which you can pull from [[*CLICK HERE*]](https://github.com/SLAPaper/stable-diffusion-webui.git). Otherwise I can't detect when the logic enter & exit hires pass.
+- 2023/05/13: Attach ToMe related settings into image generation infos, prompt paste parsing in the planning.
+
 ## Installation
 
 Open a terminal, activate your webui environment (typically, execute the `venv/Scripts/activate` from webui installation path)
