@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 
-# ToMe extension for Stable Diffusion A1111 WebUI
+# ToMe extension for Stable Diffusion A1111 WebUI (No longer needed)
 
 Use [tomesd](https://github.com/dbolya/tomesd) aka. Token Merging to speed up generation
 
@@ -22,6 +22,7 @@ Related: [official PR of A1111 WebUI](https://github.com/AUTOMATIC1111/stable-di
 
 ## Changelog
 
+- 2023/08/14: This project is no longer needed since token merging is already included in latest A1111 WebUI.
 - 2023/05/14: Experimental support activating during **hires fix**! Requires my modified version to A1111 WebUI, which you can pull from [[*CLICK HERE*]](https://github.com/SLAPaper/stable-diffusion-webui.git). Otherwise I can't detect when the logic enter & exit hires pass.
 - 2023/05/13: Attach ToMe related settings into image generation infos, prompt paste parsing in the planning.
 
